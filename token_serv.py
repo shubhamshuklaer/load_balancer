@@ -9,6 +9,7 @@ class Token_serv(Protocol):
     def dataReceived(self, data):
         tmp_token=pickle.loads(data)
         print(tmp_token.data)
+        self.transport.loseConnection()
 
 class Token_serv_factory(Factory):
     protocol=Token_serv

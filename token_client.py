@@ -8,6 +8,9 @@ import pickle
 class Token_client(Protocol):
     def connectionMade(self):
         self.transport.write(pickle.dumps(User_token([1,2,3])))
+    def connectionLost(self,reason):
+        reactor.stop()
+        # reactor.callFromThread(reactor.stop())
 
 class Token_client_factory(ClientFactory):
     protocol=Token_client
