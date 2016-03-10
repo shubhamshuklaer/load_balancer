@@ -8,9 +8,6 @@ import config
 class Token_client(Protocol):
     def connectionMade(self):
         self.transport.write(pickle.dumps(self.factory.user_token))
-    def connectionLost(self,reason):
-        reactor.stop()
-        # reactor.callFromThread(reactor.stop())
 
 class Token_client_factory(ClientFactory):
     protocol=Token_client
@@ -19,6 +16,4 @@ class Token_client_factory(ClientFactory):
         self.user_token=_user_token
 
 def run_token_client(ip,user_token):
-    reactor.connectTCP(ip, config.token_serv_port, Token_client_factory(user_token))
-    if not reactor.running:
-        reactor.run()
+    reactor.callFromThread(reactor.connectTCP,ip, config.token_serv_port, Token_client_factory(user_token))
