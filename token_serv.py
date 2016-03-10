@@ -3,6 +3,7 @@ from twisted.internet.protocol import Factory, Protocol
 from twisted.internet.endpoints import TCP4ServerEndpoint
 from twisted.internet import reactor
 import pickle
+import config
 
 class Token_serv(Protocol):
 
@@ -16,7 +17,9 @@ class Token_serv_factory(Factory):
     #  def buildProtocol(self,addr):
         #  return Token_serv()
 
-# 8007 is the port you want to run under. Choose something >1024
-endpoint = TCP4ServerEndpoint(reactor, 8007)
-endpoint.listen(Token_serv_factory())
-reactor.run()
+def run_token_serv():
+    #  endpoint = TCP4ServerEndpoint(reactor, config.token_serv_port)
+    #  endpoint.listen(Token_serv_factory())
+    reactor.listenTCP(config.token_serv_port,Token_serv_factory())
+    if not reactor.running:
+        reactor.run()
