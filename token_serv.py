@@ -9,9 +9,8 @@ import host_data
 class Token_serv(Protocol):
 
     def dataReceived(self, data):
-        tmp_token=pickle.loads(data)
-        host_data.tokens_list.append(tmp_token)
-        print(tmp_token.data)
+        tmp_tokens=pickle.loads(data)
+        host_data.append_tokens(tmp_tokens)
         self.transport.loseConnection()
 
 class Token_serv_factory(Factory):
@@ -19,5 +18,3 @@ class Token_serv_factory(Factory):
 
 def run_token_serv():
     reactor.callFromThread(reactor.listenTCP,config.token_serv_port,Token_serv_factory())
-    #  if not reactor.running:
-        #  reactor.run()

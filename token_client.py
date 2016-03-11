@@ -7,13 +7,14 @@ import config
 
 class Token_client(Protocol):
     def connectionMade(self):
-        self.transport.write(pickle.dumps(self.factory.user_token))
+        self.transport.write(pickle.dumps(self.factory.user_tokens))
 
 class Token_client_factory(ClientFactory):
     protocol=Token_client
-    user_token=None
-    def __init__(self,_user_token):
-        self.user_token=_user_token
+    user_tokens=None
+    def __init__(self,_user_tokens):
+        self.user_tokens=_user_tokens
 
-def run_token_client(ip,user_token):
-    reactor.callFromThread(reactor.connectTCP,ip, config.token_serv_port, Token_client_factory(user_token))
+# we will send list of tokens
+def run_token_client(ip,user_tokens):
+    reactor.callFromThread(reactor.connectTCP,ip, config.token_serv_port, Token_client_factory(user_tokens))

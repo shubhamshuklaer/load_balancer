@@ -18,10 +18,10 @@ threading.Thread(target=reactor.run,kwargs={'installSignalHandlers':0}).start()
 token_serv_thread=threading.Thread(target=run_token_serv)
 token_serv_thread.start()
 
-run_token_client("localhost",User_token([1,2,3]))
-run_token_client("localhost",User_token([1,2,4]))
+# Testing
+run_token_client("localhost",[User_token([1,2,3]),User_token([4,5,6])])
 time.sleep(1)
-print(host_data.tokens_list)
+host_data.print_tokens()
 
 # Note that we have to pass a callable in callFromThread. reactor.stop() is not
 # callable but reactor.stop is
