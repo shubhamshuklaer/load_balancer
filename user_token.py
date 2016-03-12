@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python
 class User_token:
     data=None
     _id=None

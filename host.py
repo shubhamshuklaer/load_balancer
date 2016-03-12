@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python
 from token_serv import run_token_serv
 from token_client import run_token_client
 from user_token import User_token
