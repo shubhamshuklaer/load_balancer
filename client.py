@@ -3,6 +3,7 @@ from token_client import run_token_client
 from user_token import User_token
 import getopt
 import sys
+from twisted.internet import reactor
 
 def usage():
     print("TODO")
@@ -24,5 +25,7 @@ for opt,arg in opts:
         usage()
         exit(0)
     elif opt=="--ip":
-        run_token_client(ip,get_test_token_list())
+        run_token_client(arg,get_test_token_list())
+        if not reactor.running:
+            reactor.run()
 
