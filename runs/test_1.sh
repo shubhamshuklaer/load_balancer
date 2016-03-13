@@ -43,18 +43,18 @@ do
     # http://askubuntu.com/questions/515198/how-to-run-terminal-as-root
     # -H will change to home folder to /root
     sudo -H xterm -e lxc-attach -n load_balancer_lab --clear-env --  docker run -P shubhamshuklaerssss/load_balancer python -u load_balancer/host.py --neighbors $(get_neighbors $i ) &
-    if [ $i -ne $num_procs ]
-    then
-        # This delay is important cause if we don't give any delay then its not
-        # certain that the program which I start in background first will get
-        # container first. In command I am assuming the Ip of containers
-        # according to order of code, but actually the ip is according to which
-        # gets the container first
-        sleep $delay
-    fi
+
+    # This delay is important cause if we don't give any delay then its not
+    # certain that the program which I start in background first will get
+    # container first. In command I am assuming the Ip of containers
+    # according to order of code, but actually the ip is according to which
+    # gets the container first
+
+    # You will need delay between last loop and client one too.
+    sleep $delay
 done
 
 echo "Hello"
-sudo lxc-attach -n load_balancer_lab --clear-env -- docker run -P shubhamshuklaerssss/load_balancer python -u load_balancer/client.py --ip 172.17.0.1 -n 20
+sudo lxc-attach -n load_balancer_lab --clear-env -- docker run -P shubhamshuklaerssss/load_balancer python -u load_balancer/client.py --ip 172.17.0.1 -n 50
 
 sudo lxc-stop -n load_balancer_lab
