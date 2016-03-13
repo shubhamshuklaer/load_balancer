@@ -10,5 +10,4 @@ def append_tokens(user_tokens):
         tokens_list.extend(user_tokens)
 
 def print_tokens():
-    for tkn in tokens_list:
-        print(tkn)
+    print(str(len(tokens_list))+" : "+str(tokens_list))

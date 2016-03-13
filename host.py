@@ -40,11 +40,14 @@ threading.Thread(target=reactor.run,kwargs={'installSignalHandlers':0}).start()
 token_serv_thread=threading.Thread(target=run_token_serv)
 token_serv_thread.start()
 
-while True:
-    balance()
-    #  host_data.print_tokens()
-    print(str(len(host_data.tokens_list))+" : "+str(host_data.tokens_list))
-    time.sleep(1)
+try:
+    while True:
+        host_data.print_tokens()
+        balance()
+        host_data.print_tokens()
+        time.sleep(1)
+except KeyboardInterrupt:
+    pass
 
 # Testing
 #  run_token_client("localhost",[User_token([1,2,3]),User_token([4,5,6])])
