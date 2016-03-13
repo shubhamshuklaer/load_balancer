@@ -42,7 +42,8 @@ token_serv_thread.start()
 
 while True:
     balance()
-    host_data.print_tokens()
+    #  host_data.print_tokens()
+    print(len(host_data.tokens_list))
     time.sleep(1)
 
 # Testing
