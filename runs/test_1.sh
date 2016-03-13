@@ -3,8 +3,11 @@
 num_procs=2
 
 # Example output '["172.17.0.2","172.17.0.3","172.17.0.4","172.17.0.5"]'
+# THere is some problems with outer single quotes. From terminal we must give
+# single quotes but in script it is causing problem. We need to remove the
+# single quote for script
 function get_neighbors(){
-    str="'["
+    str="["
     for j in `seq 1 $num_procs`
     do
         if [[ $j != $1 ]]
@@ -13,7 +16,7 @@ function get_neighbors(){
         fi
     done
     str=$(echo $str | sed 's/,$//')
-    str="$str]'"
+    str="$str]"
     echo $str
 }
 
@@ -31,7 +34,7 @@ do
     # xterm -hold -e sshpass -p root ssh root@192.168.45.10 docker run -P shubhamshuklaerssss/load_balancer python -u load_balancer/host.py --neighbors $(get_neighbors $i ) &
     # http://askubuntu.com/questions/515198/how-to-run-terminal-as-root
     # -H will change to home folder to /root
-    sudo -H xterm -hold -e lxc-attach -n load_balancer_lab --clear-env --  echo docker run -P shubhamshuklaerssss/load_balancer python -u load_balancer/host.py --neighbors $(get_neighbors $i ) &
+    sudo -H xterm -hold -e lxc-attach -n load_balancer_lab --clear-env --  docker run -P shubhamshuklaerssss/load_balancer python -u load_balancer/host.py --neighbors $(get_neighbors $i ) &
 done
 
 echo "Hello"

@@ -10,4 +10,5 @@ def append_tokens(user_tokens):
         tokens_list.extend(user_tokens)
 
 def print_tokens():
-    print(str(len(tokens_list))+" : "+str(tokens_list))
+    with tokens_list_lock:
+        print(str(len(tokens_list))+" : "+str(tokens_list))
