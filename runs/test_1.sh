@@ -33,6 +33,8 @@ sudo lxc-start -n load_balancer_lab
 sudo lxc-attach -n load_balancer_lab --clear-env -- service docker start
 sudo lxc-attach -n load_balancer_lab --clear-env -- service ssh start
 
+delay=10
+
 for i in `seq 1 $num_procs`
 do
     echo $(get_neighbors $i )
@@ -40,7 +42,16 @@ do
     # xterm -hold -e sshpass -p root ssh root@192.168.45.10 docker run -P shubhamshuklaerssss/load_balancer python -u load_balancer/host.py --neighbors $(get_neighbors $i ) &
     # http://askubuntu.com/questions/515198/how-to-run-terminal-as-root
     # -H will change to home folder to /root
-    sudo -H xterm -hold -e lxc-attach -n load_balancer_lab --clear-env --  docker run -P shubhamshuklaerssss/load_balancer python -u load_balancer/host.py --neighbors $(get_neighbors $i ) &
+    sudo -H xterm -e lxc-attach -n load_balancer_lab --clear-env --  docker run -P shubhamshuklaerssss/load_balancer python -u load_balancer/host.py --neighbors $(get_neighbors $i ) &
+    if [ $i -ne $num_procs ]
+    then
+        # This delay is important cause if we don't give any delay then its not
+        # certain that the program which I start in background first will get
+        # container first. In command I am assuming the Ip of containers
+        # according to order of code, but actually the ip is according to which
+        # gets the container first
+        sleep $delay
+    fi
 done
 
 echo "Hello"
