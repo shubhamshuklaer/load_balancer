@@ -1,6 +1,12 @@
 #!/bin/bash
 
 num_procs=2
+if [ $# -eq 1 ]
+then
+    num_procs=$1
+fi
+echo "Num hosts: $num_procs"
+
 
 # Example output '["172.17.0.2","172.17.0.3","172.17.0.4","172.17.0.5"]'
 # THere is some problems with outer single quotes. From terminal we must give
