@@ -13,6 +13,7 @@ def balance():
         for i in range(len(host_data.tokens_list)):
             tmp=host_data.tokens_list.pop()
             index=i % 2*d
+            print("index :"+str(index))
             if index < d:
                 tmp_tkns[index].append(tmp)
             else:
@@ -23,6 +24,7 @@ def balance():
 
 def send_tokens(tmp_tkns):
     for i in range(len(host_data.neighbors)):
+        print("s "+str(i)+":"+str(tmp_tkns[i]))
         run_token_client(host_data.neighbors[i],tmp_tkns[i])
 
 
