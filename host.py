@@ -25,6 +25,7 @@ for opt,arg in opts:
         usage()
         exit(0)
     elif opt=="--neighbors":
+        print(arg)
         host_data.neighbors=json.loads(arg)
 
 
