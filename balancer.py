@@ -11,9 +11,10 @@ def balance():
     # Balance algo
     with host_data.tokens_list_lock:
         tk_len=len(host_data.tokens_list)
+
         for i in range(tk_len):
             tmp=host_data.tokens_list.pop()
-            index=i % 2*d
+            index=i % (2*d)
             print("index :"+str(index))
             if index < d:
                 tmp_tkns[index].append(tmp)
