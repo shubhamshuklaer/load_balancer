@@ -4,6 +4,7 @@ from threading import Lock
 neighbors=[]
 tokens_list=[]
 tokens_list_lock=Lock()
+prev_index=0
 
 def append_tokens(user_tokens):
     with tokens_list_lock:

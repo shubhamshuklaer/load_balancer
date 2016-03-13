@@ -1,11 +1,18 @@
 #!/bin/bash
 
 num_procs=2
+num_tkns=20
 if [ $# -eq 1 ]
 then
     num_procs=$1
 fi
+if [ $# -eq 2 ]
+then
+    num_procs=$1
+    num_tkns=$2
+fi
 echo "Num hosts: $num_procs"
+echo "Num tkns: $num_tkns"
 
 
 # Example output '["172.17.0.2","172.17.0.3","172.17.0.4","172.17.0.5"]'
@@ -55,6 +62,6 @@ do
 done
 
 echo "Hello"
-sudo lxc-attach -n load_balancer_lab --clear-env -- docker run -P shubhamshuklaerssss/load_balancer python -u load_balancer/client.py --ip 172.17.0.1 -n 50
+sudo lxc-attach -n load_balancer_lab --clear-env -- docker run -P shubhamshuklaerssss/load_balancer python -u load_balancer/client.py --ip 172.17.0.1 -n $(echo $num_tkns)
 
 sudo lxc-stop -n load_balancer_lab
