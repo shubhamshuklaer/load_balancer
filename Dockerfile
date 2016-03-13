@@ -6,4 +6,3 @@ RUN mkdir load_balancer
 ADD . load_balancer/
 EXPOSE 8007
 EXPOSE 8008
-CMD ["python", "/load_balancer/host.py"]
