@@ -38,7 +38,7 @@ sudo lxc-start -n load_balancer_lab
 
 # sshpass -p root ssh root@192.168.45.10 "service docker start"
 sudo lxc-attach -n load_balancer_lab --clear-env -- service docker start
-sudo lxc-attach -n load_balancer_lab --clear-env -- service ssh start
+# sudo lxc-attach -n load_balancer_lab --clear-env -- service ssh start
 
 delay=10
 

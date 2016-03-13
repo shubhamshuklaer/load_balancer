@@ -15,7 +15,7 @@ def balance():
 
         for i in range(tk_len):
             tmp=host_data.tokens_list.pop()
-            index=(host_data.prev_index + 1) + i % (2*d)
+            index=(host_data.prev_index + 1 + i) % (2*d)
             #  print("index :"+str(index))
             if index < d:
                 tmp_tkns[index].append(tmp)
