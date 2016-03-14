@@ -1,3 +1,4 @@
 *.pyc
 *~
 load_balancer.wiki/
+nohup.out

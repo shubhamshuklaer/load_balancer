@@ -2,6 +2,8 @@
 
 num_procs=2
 num_tkns=20
+delay=10
+
 if [ $# -eq 1 ]
 then
     num_procs=$1
@@ -40,7 +42,7 @@ sudo lxc-start -n load_balancer_lab
 sudo lxc-attach -n load_balancer_lab --clear-env -- service docker start
 # sudo lxc-attach -n load_balancer_lab --clear-env -- service ssh start
 
-delay=10
+sleep $delay
 
 for i in `seq 1 $num_procs`
 do
@@ -49,7 +51,11 @@ do
     # xterm -hold -e sshpass -p root ssh root@192.168.45.10 docker run -P shubhamshuklaerssss/load_balancer python -u load_balancer/host.py --neighbors $(get_neighbors $i ) &
     # http://askubuntu.com/questions/515198/how-to-run-terminal-as-root
     # -H will change to home folder to /root
+    # http://unix.stackexchange.com/questions/3886/difference-between-nohup-disown-and
     sudo -H xterm -hold -e lxc-attach -n load_balancer_lab --clear-env --  docker run -P shubhamshuklaerssss/load_balancer python -u load_balancer/host.py --neighbors $(get_neighbors $i ) &
+
+    # http://www.thegeekstuff.com/2010/06/bash-array-tutorial/
+    pids[$(($i - 1))]=$!
 
     # This delay is important cause if we don't give any delay then its not
     # certain that the program which I start in background first will get
@@ -61,7 +67,18 @@ do
     sleep $delay
 done
 
-echo "Hello"
+# disown
+
+echo "Pids ${pids[@]}"
+
 sudo lxc-attach -n load_balancer_lab --clear-env -- docker run -P shubhamshuklaerssss/load_balancer python -u load_balancer/client.py --ip 172.17.0.1 -n $(echo $num_tkns)
 
+# for i in `seq 1 $num_procs`
+# do
+    # http://superuser.com/questions/632979/if-i-know-the-pid-number-of-a-process-how-can-i-get-its-name
+    # ps -p ${pids[$(($i - 1))]} -o command=
+    # sudo kill -SIGINT ${pids[$(($i - 1))]}
+# done
+
+# sudo lxc-attach -n load_balancer_lab --clear-env -- dmsetup remove_all
 sudo lxc-stop -n load_balancer_lab
