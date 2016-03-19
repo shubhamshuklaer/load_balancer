@@ -1,12 +1,15 @@
 #!/usr/bin/env python
 class User_token:
     WORKER="worker"
+    NORMAL="normal"
     data=None
     data_type=None
+    worker_hash=None
     _id=None
-    def __init__(self,_data=None,_data_type=None,__id=None):
+    def __init__(self,_data=None,_data_type=None,_worker_hash=None,__id=None):
         self.data=_data
         self.data_type=_data_type
+        self.worker_hash=_worker_hash
 
     # called by built-in str() and print() function.
     def __str__(self):

@@ -5,10 +5,12 @@ import getopt
 import sys
 import os
 from twisted.internet import reactor
+import host_data
 
 num_tokens=10
 ip=None
 file_path=None
+send_tokens=False
 
 def usage():
     print("TODO")
@@ -16,16 +18,10 @@ def usage():
 def get_test_token_list():
     ret_val=[]
     for i in range(num_tokens):
-        ret_val.append(User_token(i))
+        ret_val.append(User_token(i,User_token.NORMAL,host_data.calc_file_hash(file_path)))
     return ret_val
 
 def get_file():
-    print(file_path)
-    print(os.path.splitext(file_path))
-    if not (os.path.exists(file_path) and os.path.splitext(file_path)[1]==".py"):
-        print("File does not exist or is not a python script")
-        exit(2)
-
     data=dict()
     data["file_name"]=os.path.basename(file_path)
     with open(file_path,"r") as script:
@@ -34,7 +30,7 @@ def get_file():
 
 
 try:
-    opts,args=getopt.getopt(sys.argv[1:],"hn:",["ip=","file="])
+    opts,args=getopt.getopt(sys.argv[1:],"hn:s",["ip=","file="])
 except getopt.GetoptError:
     usage()
     exit(2)
@@ -44,17 +40,24 @@ for opt,arg in opts:
         usage()
         exit(0)
     elif opt=="-n":
+        send_tokens=True
         num_tokens=int(arg)
     elif opt=="--ip":
         ip=arg
     elif opt=="--file":
         file_path=os.path.expanduser(arg)
 
+
+if not (os.path.exists(file_path) and os.path.splitext(file_path)[1]==".py"):
+    print("File does not exist or is not a python script")
+    exit(2)
+
 if ip != None:
-    if file_path is not None:
-        run_token_client(ip,get_file())
-    else:
+    if send_tokens == True:
         run_token_client(ip,get_test_token_list())
+    else:
+        run_token_client(ip,get_file())
+
     if not reactor.running:
         reactor.run()
 

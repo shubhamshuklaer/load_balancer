@@ -5,6 +5,8 @@ from token_client import run_token_client
 
 def balance():
     d=len(host_data.neighbors)
+    if d == 0:
+        return
     tmp_tkns=[]
     for i in range(d):
         tmp_tkns.append([])

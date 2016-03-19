@@ -28,7 +28,7 @@ for opt,arg in opts:
         print(arg)
         host_data.neighbors=json.loads(arg)
 
-
+host_data.gen_all_hash()
 
 # http://twistedmatrix.com/trac/wiki/FrequentlyAskedQuestions#Igetexceptions.ValueError:signalonlyworksinmainthreadwhenItrytorunmyTwistedprogramWhatswrong
 # The default reactor, by default, will install signal handlers to catch events
@@ -38,13 +38,13 @@ for opt,arg in opts:
 # work around this.
 threading.Thread(target=reactor.run,kwargs={'installSignalHandlers':0}).start()
 
-token_serv_thread=threading.Thread(target=run_token_serv)
-token_serv_thread.start()
+token_serv_thread=threading.Thread(target=run_token_serv).start()
 
 try:
     while True:
         #  host_data.print_tokens()
         balance()
+        host_data.solve_one_token()
         host_data.print_tokens()
         time.sleep(1)
 except KeyboardInterrupt:
