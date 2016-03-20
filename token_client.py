@@ -16,5 +16,5 @@ class Token_client_factory(ClientFactory):
         self.user_tokens=_user_tokens
 
 # we will send list of tokens
-def run_token_client(ip,user_tokens):
-    reactor.callFromThread(reactor.connectTCP,ip, config.token_serv_port, Token_client_factory(user_tokens))
+def run_token_client(ip,user_tokens,port=config.token_serv_port):
+    reactor.callFromThread(reactor.connectTCP,ip, port, Token_client_factory(user_tokens))

@@ -5,6 +5,9 @@ import hashlib
 import sys
 import threading
 import imp
+import config
+from token_client import run_token_client
+from user_token import User_token
 
 neighbors=[]
 tokens_list=[]
@@ -54,6 +57,10 @@ def gen_all_hash():
             file_path=os.path.join(workers_dir,file_name)
             workers_hash[calc_file_hash(file_path)]=file_path
 
+def solve_data(tkn,worker_path):
+    mod = imp.load_source("tmp_worker",worker_path)
+    run_token_client(tkn.ip,[User_token(mod.solve(tkn.data),User_token.SOLVED)],config.solved_token_serv_port)
+
 def solve_one_token():
     tmp_tkn=None
     with tokens_list_lock:
@@ -62,8 +69,7 @@ def solve_one_token():
     if tmp_tkn != None:
         if tmp_tkn.worker_hash in workers_hash:
             # http://stackoverflow.com/questions/67631/how-to-import-a-module-given-the-full-path
-            mod = imp.load_source("tmp_worker",workers_hash[tmp_tkn.worker_hash])
-            threading.Thread(target=mod.solve,args=[tmp_tkn.data]).start()
+            threading.Thread(target=solve_data,args=[tmp_tkn,workers_hash[tmp_tkn.worker_hash]]).start()
         else:
             with tokens_list_lock:
                 tokens_list.append(tmp_tkn)

@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 from token_client import run_token_client
+from token_serv import run_token_serv
 from user_token import User_token
 import getopt
 import sys
 import os
 from twisted.internet import reactor
 import host_data
+import config
 
 num_tokens=10
 ip=None
@@ -55,6 +57,7 @@ if not (os.path.exists(file_path) and os.path.splitext(file_path)[1]==".py"):
 if ip != None:
     if send_tokens == True:
         run_token_client(ip,get_test_token_list())
+        run_token_serv(config.solved_token_serv_port)
     else:
         run_token_client(ip,get_file())
 

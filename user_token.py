@@ -1,15 +1,28 @@
 #!/usr/bin/env python
+
+# http://stackoverflow.com/questions/24196932/how-can-i-get-the-ip-address-of-eth0-in-python/30990617#30990617
+# if you want to get the ip of which ever interface is used to connect to the network
+# You do not have to have a route to 8.8.8.8 to use this. All it is doing is opening a socket, but not connecting.
+import socket
+def get_ip_address():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("8.8.8.8", 80))
+    return s.getsockname()[0]
+
 class User_token:
     WORKER="worker"
     NORMAL="normal"
+    SOLVED="solved"
     data=None
     data_type=None
     worker_hash=None
+    ip=None
     _id=None
     def __init__(self,_data=None,_data_type=None,_worker_hash=None,__id=None):
         self.data=_data
         self.data_type=_data_type
         self.worker_hash=_worker_hash
+        self.ip=get_ip_address()
 
     # called by built-in str() and print() function.
     def __str__(self):
