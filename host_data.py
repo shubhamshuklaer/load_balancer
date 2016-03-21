@@ -37,6 +37,12 @@ def calc_file_hash(file_path):
         return None
     else:
         # http://stackoverflow.com/questions/3431825/generating-a-md5-checksum-of-a-file/3431835#3431835
+        # I think block size is only so that we don't have to store the entire huge file in a string.
+        # I don't think it has anythin to do with the library
+        # https://docs.python.org/3/library/hashlib.html
+        # Its written that Repeated calls are equivalent to a single call with
+        # the concatenation of all the arguments: m.update(a); m.update(b) is
+        # equivalent to m.update(a+b).
         blocksize=65536
         hasher=hashlib.sha256()
         with open(file_path,"r") as f:
@@ -51,6 +57,26 @@ def insert_worker_hash(file_path):
     hash_val=calc_file_hash(file_path)
     with workers_hash_lock:
         workers_hash[hash_val]=file_path
+
+def insert_worker(file_name,content):
+    file_path=os.path.join(workers_dir,file_name)
+    hasher=hashlib.sha256()
+    hasher.update(content.encode("utf-8"))
+    hash_val=hasher.digest()
+    if hash_val in workers_hash:
+        #  print("worker exists")
+        return False
+
+    with open(file_path,"w") as worker_file:
+        worker_file.write(content)
+    host_data.insert_worker_hash(file_path)
+    return True
+
+def send_worker_to_all(tkn):
+    with neighbors_lock:
+        for ip in neighbors:
+            run_token_client(ip,[tkn])
+
 
 
 def append_tokens(user_tokens):

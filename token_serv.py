@@ -16,10 +16,8 @@ class Token_serv(DatagramProtocol):
             tmp_tkn=tmp_tokens[0]
             # Only for normal tokens will I send multiple tokens at once
             if tmp_tkn.data_type==User_token.WORKER:
-                file_path=os.path.join(host_data.workers_dir,tmp_tkn.data["file_name"])
-                with open(file_path,"w") as worker_file:
-                    worker_file.write(tmp_tkn.data["content"])
-                host_data.insert_worker_hash(file_path)
+                if host_data.insert_worker(tmp_tkn.data["file_name"],tmp_tkn.data["content"]):
+                    host_data.send_worker_to_all(tmp_tkn)
             elif tmp_tkn.data_type==User_token.SOLVED:
                 print(tmp_tkn)
             elif tmp_tkn.data_type==User_token.SERVICE_BROADCAST:
