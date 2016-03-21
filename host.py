@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from token_serv import run_token_serv
 from token_client import run_token_client
-from user_token import User_token
+from user_token import User_token,get_ip_address
 import threading
 import host_data
 from twisted.internet import reactor
@@ -39,6 +39,8 @@ host_data.gen_all_hash()
 threading.Thread(target=reactor.run,kwargs={'installSignalHandlers':0}).start()
 
 token_serv_thread=threading.Thread(target=run_token_serv).start()
+
+print(get_ip_address())
 
 count=0
 

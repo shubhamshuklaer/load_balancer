@@ -49,6 +49,8 @@ for opt,arg in opts:
     elif opt=="--file":
         file_path=os.path.expanduser(arg)
 
+if file_path == None:
+    exit(2)
 
 if not (os.path.exists(file_path) and os.path.splitext(file_path)[1]==".py"):
     print("File does not exist or is not a python script")
