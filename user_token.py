@@ -13,6 +13,7 @@ class User_token:
     WORKER="worker"
     NORMAL="normal"
     SOLVED="solved"
+    SERVICE_BROADCAST="service_broadcast"
     data=None
     data_type=None
     worker_hash=None
@@ -26,7 +27,7 @@ class User_token:
 
     # called by built-in str() and print() function.
     def __str__(self):
-        return self.__repr__(self)
+        return self.__repr__()
 
     # http://stackoverflow.com/questions/875074/how-to-print-a-list-dict-or-collection-of-objects-in-python
     # Called by built-in repr() function. When we print list of user_tokens the

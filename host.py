@@ -40,13 +40,19 @@ threading.Thread(target=reactor.run,kwargs={'installSignalHandlers':0}).start()
 
 token_serv_thread=threading.Thread(target=run_token_serv).start()
 
+count=0
+
 try:
     while True:
         #  host_data.print_tokens()
         balance()
         host_data.solve_one_token()
         host_data.print_tokens()
+        if count % 30 == 0:
+            host_data.broadcast_service()
+            print(host_data.neighbors)
         time.sleep(1)
+        count=count+1
 except KeyboardInterrupt:
     pass
 

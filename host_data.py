@@ -7,16 +7,29 @@ import threading
 import imp
 import config
 from token_client import run_token_client
-from user_token import User_token
+from user_token import User_token,get_ip_address
 
 neighbors=[]
 tokens_list=[]
 tokens_list_lock=Lock()
 workers_hash_lock=Lock()
+neighbors_lock=Lock()
 prev_index=0
 
 workers_hash=dict()
 workers_dir=os.path.join(os.path.dirname(os.path.realpath(__file__)),"workers")
+
+def insert_neighbor(ip):
+    if ip != get_ip_address():
+        with neighbors_lock:
+            if ip not in neighbors:
+                neighbors.append(ip)
+
+
+def broadcast_service():
+    tkn=User_token("",User_token.SERVICE_BROADCAST)
+    run_token_client("<broadcast>",[tkn])
+
 
 def calc_file_hash(file_path):
     file_path=os.path.expanduser(file_path)
