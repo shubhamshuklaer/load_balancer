@@ -1,16 +1,16 @@
 #!/usr/bin/env python
-from twisted.internet.protocol import Factory, Protocol
-from twisted.internet.endpoints import TCP4ServerEndpoint
+from twisted.internet.protocol import DatagramProtocol
 from twisted.internet import reactor
 import pickle
 import config
 import host_data
 from user_token import User_token
 import os
+# https://twistedmatrix.com/documents/15.5.0/core/howto/udp.html
+# http://www.math.uiuc.edu/~gfrancis/illimath/windows/aszgard_mini/pylibs/twisted/test/test_udp.py
+class Token_serv(DatagramProtocol):
 
-class Token_serv(Protocol):
-
-    def dataReceived(self, data):
+    def datagramReceived(self, data,addr):
         tmp_tokens=pickle.loads(data)
         if len(tmp_tokens)!=0 and tmp_tokens[0].data_type==User_token.WORKER:
             for tmp_tkn in tmp_tokens:
@@ -22,10 +22,12 @@ class Token_serv(Protocol):
             print(tmp_tokens)
         else:
             host_data.append_tokens(tmp_tokens)
-        self.transport.loseConnection()
+        #  self.transport.loseConnection()
+    def startProtocol(self):
+        print("start")
 
-class Token_serv_factory(Factory):
-    protocol=Token_serv
+    def stopProtocol(self):
+        print("stopped")
 
 def run_token_serv(port=config.token_serv_port):
-    reactor.callFromThread(reactor.listenTCP,port,Token_serv_factory())
+    reactor.callFromThread(reactor.listenUDP,port,Token_serv())
