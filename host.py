@@ -50,7 +50,7 @@ try:
         balance()
         host_data.solve_one_token()
         host_data.print_tokens()
-        if count % 30 == 0:
+        if count % 10 == 0:
             host_data.broadcast_service()
             print(host_data.neighbors)
         time.sleep(1)

@@ -37,9 +37,10 @@ do
     # gets the container first
 
     # You will need delay between last loop and client one too.
-    sleep $delay
 done
 
+# This delay is higher so that by the time client is run everyone knows about their neighbors.
+sleep $((2 * $delay))
 echo "Pids ${pids[@]}"
 
 # 172.17.0.1 is for host

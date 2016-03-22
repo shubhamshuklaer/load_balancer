@@ -11,20 +11,23 @@ import os
 class Token_serv(DatagramProtocol):
 
     def datagramReceived(self, data,addr):
-        tmp_tokens=pickle.loads(data)
-        if len(tmp_tokens) != 0:
-            tmp_tkn=tmp_tokens[0]
-            # Only for normal tokens will I send multiple tokens at once
-            if tmp_tkn.data_type==User_token.WORKER:
-                if host_data.insert_worker(tmp_tkn.data["file_name"],tmp_tkn.data["content"]):
-                    host_data.send_worker_to_all(tmp_tkn)
-            elif tmp_tkn.data_type==User_token.SOLVED:
-                print(tmp_tkn)
-            elif tmp_tkn.data_type==User_token.SERVICE_BROADCAST:
-                host_data.insert_neighbor(tmp_tkn.ip)
-            else:
-                host_data.append_tokens(tmp_tokens)
-        #  self.transport.loseConnection()
+        try:
+            tmp_tokens=pickle.loads(data)
+            if len(tmp_tokens) != 0:
+                tmp_tkn=tmp_tokens[0]
+                # Only for normal tokens will I send multiple tokens at once
+                if tmp_tkn.data_type==User_token.WORKER:
+                    if host_data.insert_worker(tmp_tkn.data["file_name"],tmp_tkn.data["content"]):
+                        host_data.send_worker_to_all(tmp_tkn)
+                elif tmp_tkn.data_type==User_token.SOLVED:
+                    print(tmp_tkn)
+                elif tmp_tkn.data_type==User_token.SERVICE_BROADCAST:
+                    host_data.insert_neighbor(tmp_tkn.ip)
+                else:
+                    host_data.append_tokens(tmp_tokens)
+            #  self.transport.loseConnection()
+        except EOFError:
+            print(str(addr)+" : "+str(data))
 
     #  def startProtocol(self):
         #  print("start")

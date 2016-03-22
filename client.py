@@ -21,6 +21,7 @@ def get_test_token_list():
     ret_val=[]
     for i in range(num_tokens):
         ret_val.append(User_token(i,User_token.NORMAL,host_data.calc_file_hash(file_path)))
+    print(ret_val)
     return ret_val
 
 def get_file():
