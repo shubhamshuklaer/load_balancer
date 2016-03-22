@@ -27,6 +27,8 @@ class Token_serv(DatagramProtocol):
                     host_data.append_tokens(tmp_tokens)
             #  self.transport.loseConnection()
         except EOFError:
+            with open("/tmp/got.txt","wb") as log_file:
+                log_file.write(data)
             print(str(addr)+" : "+str(data))
 
     #  def startProtocol(self):
