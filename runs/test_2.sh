@@ -22,10 +22,15 @@ sudo systemctl restart docker
 
 sleep $delay
 
-for i in `seq 1 $num_procs`
+for i in `seq 1 $(($num_procs + 1))`
 do
     # http://unix.stackexchange.com/questions/3886/difference-between-nohup-disown-and
-    xterm -e docker run -P shubhamshuklaerssss/load_balancer python -u load_balancer/host.py &
+    if [ $i -ne $(($num_procs + 1)) ]
+    then
+        xterm -e docker run -P shubhamshuklaerssss/load_balancer python -u load_balancer/host.py &
+    else
+        xterm -e docker run -P shubhamshuklaerssss/load_balancer python -u load_balancer/overview.py &
+    fi
 
     # http://www.thegeekstuff.com/2010/06/bash-array-tutorial/
     pids[$(($i - 1))]=$!
