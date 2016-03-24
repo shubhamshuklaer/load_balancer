@@ -14,6 +14,8 @@ class User_token:
     NORMAL="normal"
     SOLVED="solved"
     SERVICE_BROADCAST="service_broadcast"
+    LOG="log"
+    LOG_SERVICE_BROADCAST="log_service_broadcast"
     data=None
     data_type=None
     worker_hash=None

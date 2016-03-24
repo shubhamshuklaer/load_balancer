@@ -11,6 +11,8 @@ from user_token import User_token,get_ip_address
 
 neighbors=[]
 tokens_list=[]
+log_servers=[]
+log_servers_lock=Lock()
 tokens_list_lock=Lock()
 workers_hash_lock=Lock()
 neighbors_lock=Lock()
@@ -18,6 +20,20 @@ prev_index=0
 
 workers_hash=dict()
 workers_dir=os.path.join(os.path.dirname(os.path.realpath(__file__)),"workers")
+
+def insert_log_server(ip):
+    with log_servers_lock:
+        if ip not in log_servers:
+            log_servers.append(ip)
+
+def send_log():
+    data=dict()
+    data["num_tokens"]=len(tokens_list)
+    tkn=User_token(data,User_token.LOG)
+    with log_servers_lock:
+        for ip in log_servers:
+            run_token_client(ip,[tkn],config.log_serv_port)
+
 
 def insert_neighbor(ip):
     if ip != get_ip_address():

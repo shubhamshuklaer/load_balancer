@@ -23,6 +23,10 @@ class Token_serv(DatagramProtocol):
                     print(tmp_tkn)
                 elif tmp_tkn.data_type==User_token.SERVICE_BROADCAST:
                     host_data.insert_neighbor(tmp_tkn.ip)
+                elif tmp_tkn.data_type==User_token.LOG_SERVICE_BROADCAST:
+                    host_data.insert_log_server(tmp_tkn.ip)
+                elif tmp_tkn.data_type==User_token.LOG:
+                    print(tmp_tkn.ip+" : "+str(tmp_tkn.data["num_tokens"]))
                 else:
                     host_data.append_tokens(tmp_tokens)
             #  self.transport.loseConnection()

@@ -6,3 +6,4 @@ RUN mkdir load_balancer
 ADD . load_balancer/
 EXPOSE 8007
 EXPOSE 8008
+EXPOSE 8009
