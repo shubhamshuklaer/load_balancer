@@ -20,13 +20,15 @@ neighbors_lock=Lock()
 prev_index=0
 is_hypercube=False
 own_ip=get_ip_address()
+# Ip assigned to with docker starts from 2, but grey code should start from 0
+ip_sub=2
 
 workers_hash=dict()
 workers_dir=os.path.join(os.path.dirname(os.path.realpath(__file__)),"workers")
 
 def is_hypercube_neighbor(ip):
-    own_ip_bin=bin(int(ipaddress.IPv4Address(own_ip)))
-    ip_bin=bin(int(ipaddress.IPv4Address(ip)))
+    own_ip_bin=bin(int(ipaddress.IPv4Address(own_ip)-ip_sub))
+    ip_bin=bin(int(ipaddress.IPv4Address(ip)-ip_sub))
     num_diff=0
     for i in range(len(own_ip_bin)):
         if own_ip_bin[i] != ip_bin[i]:
