@@ -8,6 +8,7 @@ import imp
 import config
 from token_client import run_token_client
 from user_token import User_token,get_ip_address
+import ipaddress
 
 neighbors=[]
 tokens_list=[]
@@ -17,9 +18,23 @@ tokens_list_lock=Lock()
 workers_hash_lock=Lock()
 neighbors_lock=Lock()
 prev_index=0
+is_hypercube=False
+own_ip=get_ip_address()
 
 workers_hash=dict()
 workers_dir=os.path.join(os.path.dirname(os.path.realpath(__file__)),"workers")
+
+def is_hypercube_neighbor(ip):
+    own_ip_bin=bin(int(ipaddress.IPv4Address(own_ip)))
+    ip_bin=bin(int(ipaddress.IPv4Address(ip)))
+    num_diff=0
+    for i in range(len(own_ip_bin)):
+        if own_ip_bin[i] != ip_bin[i]:
+            num_diff=num_diff+1
+    if num_diff == 1:
+        return True
+    else:
+        return False
 
 def insert_log_server(ip):
     with log_servers_lock:

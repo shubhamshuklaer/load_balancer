@@ -19,7 +19,7 @@ def usage():
     print("TODO")
 
 try:
-    opts,args=getopt.getopt(sys.argv[1:],"h",["neighbors=","log_server"])
+    opts,args=getopt.getopt(sys.argv[1:],"h",["neighbors=","log_server","hypercube"])
 except getopt.GetoptError:
     usage()
     exit(2)
@@ -33,6 +33,8 @@ for opt,arg in opts:
         host_data.neighbors=json.loads(arg)
     elif opt=="--log_server":
         host_server=False
+    elif opt=="--hypercube":
+        host_data.is_hypercube=True
 
 if not reactor.running:
     # http://twistedmatrix.com/trac/wiki/FrequentlyAskedQuestions#Igetexceptions.ValueError:signalonlyworksinmainthreadwhenItrytorunmyTwistedprogramWhatswrong

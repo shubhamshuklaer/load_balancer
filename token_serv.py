@@ -22,7 +22,11 @@ class Token_serv(DatagramProtocol):
                 elif tmp_tkn.data_type==User_token.SOLVED:
                     print(tmp_tkn)
                 elif tmp_tkn.data_type==User_token.SERVICE_BROADCAST:
-                    host_data.insert_neighbor(tmp_tkn.ip)
+                    if host_data.is_hypercube:
+                        if host_data.is_hypercube_neighbor(tmp_tkn.ip):
+                            host_data.insert_neighbor(tmp_tkn.ip)
+                    else:
+                        host_data.insert_neighbor(tmp_tkn.ip)
                 elif tmp_tkn.data_type==User_token.LOG_SERVICE_BROADCAST:
                     host_data.insert_log_server(tmp_tkn.ip)
                 elif tmp_tkn.data_type==User_token.LOG:
