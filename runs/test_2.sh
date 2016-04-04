@@ -29,7 +29,9 @@ do
     then
         xterm -e docker run -P shubhamshuklaerssss/load_balancer python -u load_balancer/host.py &
     else
-        xterm -e docker run -P shubhamshuklaerssss/load_balancer python -u load_balancer/overview.py &
+        # We need 172.17.0.2 as a host not log_server
+        sleep $delay
+        xterm -e docker run -P shubhamshuklaerssss/load_balancer python -u load_balancer/host.py --log_server &
     fi
 
     # http://www.thegeekstuff.com/2010/06/bash-array-tutorial/
@@ -44,9 +46,9 @@ do
     # You will need delay between last loop and client one too.
 done
 
-# This delay is higher so that by the time client is run everyone knows about their neighbors.
-sleep $((2 * $delay))
+sleep $delay
 echo "Pids ${pids[@]}"
 
 # 172.17.0.1 is for host
 docker run -P shubhamshuklaerssss/load_balancer python -u load_balancer/client.py --ip 172.17.0.2 -n $(echo $num_tkns) --file load_balancer/workers/square.py
+# No need to kill the ${pids} as they are automatically killed when we do ctrl+c on the script

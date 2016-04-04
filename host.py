@@ -10,12 +10,16 @@ from balancer import balance
 import getopt
 import sys
 import json
+import config
+
+host_server=True
+stop_it=False
 
 def usage():
     print("TODO")
 
 try:
-    opts,args=getopt.getopt(sys.argv[1:],"h",["neighbors="])
+    opts,args=getopt.getopt(sys.argv[1:],"h",["neighbors=","log_server"])
 except getopt.GetoptError:
     usage()
     exit(2)
@@ -27,18 +31,24 @@ for opt,arg in opts:
     elif opt=="--neighbors":
         print(arg)
         host_data.neighbors=json.loads(arg)
+    elif opt=="--log_server":
+        host_server=False
 
-host_data.gen_all_hash()
+if not reactor.running:
+    # http://twistedmatrix.com/trac/wiki/FrequentlyAskedQuestions#Igetexceptions.ValueError:signalonlyworksinmainthreadwhenItrytorunmyTwistedprogramWhatswrong
+    # The default reactor, by default, will install signal handlers to catch events
+    # like Ctrl-C, SIGTERM, and so on. However, you can't install signal handlers
+    # from non-main threads in Python, which means that reactor.run() will cause an
+    # error. Pass the installSignalHandlers=0 keyword argument to reactor.run to
+    # work around this.
+    threading.Thread(target=reactor.run,kwargs={'installSignalHandlers':0}).start()
+    stop_it=True
 
-# http://twistedmatrix.com/trac/wiki/FrequentlyAskedQuestions#Igetexceptions.ValueError:signalonlyworksinmainthreadwhenItrytorunmyTwistedprogramWhatswrong
-# The default reactor, by default, will install signal handlers to catch events
-# like Ctrl-C, SIGTERM, and so on. However, you can't install signal handlers
-# from non-main threads in Python, which means that reactor.run() will cause an
-# error. Pass the installSignalHandlers=0 keyword argument to reactor.run to
-# work around this.
-threading.Thread(target=reactor.run,kwargs={'installSignalHandlers':0}).start()
-
-token_serv_thread=threading.Thread(target=run_token_serv).start()
+if host_server:
+    host_data.gen_all_hash()
+    threading.Thread(target=run_token_serv).start()
+else:
+    threading.Thread(target=run_token_serv,args=[config.log_serv_port]).start()
 
 print(get_ip_address())
 
@@ -46,24 +56,25 @@ count=0
 
 try:
     while True:
-        #  host_data.print_tokens()
-        balance()
-        host_data.solve_one_token()
-        host_data.print_tokens()
-        host_data.send_log()
-        if count % 10 == 0:
-            host_data.broadcast_service()
-            print(host_data.neighbors)
+        if host_server:
+            #  host_data.print_tokens()
+            balance()
+            host_data.solve_one_token()
+            host_data.print_tokens()
+            host_data.send_log()
+            if count % 10 == 0:
+                host_data.broadcast_service()
+                print(host_data.neighbors)
+        else:
+            if count % 10 == 0:
+                run_token_client("<broadcast>",[User_token("",User_token.LOG_SERVICE_BROADCAST)])
         time.sleep(1)
         count=count+1
 except KeyboardInterrupt:
     pass
 
-# Testing
-#  run_token_client("localhost",[User_token([1,2,3]),User_token([4,5,6])])
-#  time.sleep(1)
-#  host_data.print_tokens()
 
-# Note that we have to pass a callable in callFromThread. reactor.stop() is not
-# callable but reactor.stop is
-reactor.callFromThread(reactor.stop)
+if stop_it:
+    # Note that we have to pass a callable in callFromThread. reactor.stop() is not
+    # callable but reactor.stop is
+    reactor.callFromThread(reactor.stop)
