@@ -4,6 +4,7 @@
 # if you want to get the ip of which ever interface is used to connect to the network
 # You do not have to have a route to 8.8.8.8 to use this. All it is doing is opening a socket, but not connecting.
 import socket
+import threading
 def get_ip_address():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.connect(("8.8.8.8", 80))
@@ -21,11 +22,19 @@ class User_token:
     worker_hash=None
     ip=None
     _id=None
+    tkn_no=0
+    tkn_no_lock=threading.Lock()
     def __init__(self,_data=None,_data_type=None,_worker_hash=None,__id=None):
         self.data=_data
         self.data_type=_data_type
         self.worker_hash=_worker_hash
         self.ip=get_ip_address()
+        self._id=__id
+        with User_token.tkn_no_lock:
+            User_token.tkn_no=User_token.tkn_no+1
+        if self._id==None:
+            with User_token.tkn_no_lock:
+                self._id=get_ip_address()+" : "+str(User_token.tkn_no)
 
     # called by built-in str() and print() function.
     def __str__(self):
