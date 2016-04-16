@@ -3,6 +3,7 @@ from token_serv import run_token_serv
 from token_client import run_token_client
 from user_token import User_token,get_ip_address
 import threading
+from multiprocessing import Process
 import host_data
 from twisted.internet import reactor
 import time
@@ -50,6 +51,7 @@ if host_server:
     host_data.gen_all_hash()
     threading.Thread(target=run_token_serv).start()
 else:
+    host_data.init_log()
     threading.Thread(target=run_token_serv,args=[config.log_serv_port]).start()
 
 print(get_ip_address())
@@ -70,6 +72,7 @@ try:
         else:
             if count % 10 == 0:
                 run_token_client("<broadcast>",[User_token("",User_token.LOG_SERVICE_BROADCAST)])
+            host_data.draw_log()
         time.sleep(1)
         count=count+1
 except KeyboardInterrupt:

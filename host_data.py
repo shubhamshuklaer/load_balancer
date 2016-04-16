@@ -9,6 +9,7 @@ import config
 from token_client import run_token_client
 from user_token import User_token,get_ip_address
 import ipaddress
+import networkx as nx
 
 neighbors=[]
 tokens_list=[]
@@ -23,8 +24,72 @@ own_ip=get_ip_address()
 # Ip assigned to with docker starts from 2, but grey code should start from 0
 ip_sub=2
 
+# For log server
+log=None
+log_lock=None
+plt=None
+pos=None
+
 workers_hash=dict()
 workers_dir=os.path.join(os.path.dirname(os.path.realpath(__file__)),"workers")
+
+def init_log():
+    global log
+    global log_lock
+    # http://stackoverflow.com/questions/11990556/python-how-to-make-global-imports-from-a-function
+    global plt
+    import matplotlib.pyplot as plt
+    # For log server
+    # https://groups.google.com/forum/#!topic/networkx-discuss/rUkjuIYFUec
+    w,h=plt.figaspect(1)
+    plt.figure(figsize=(w,h))
+    # without plt.ion the update_log function does not return
+    # http://stackoverflow.com/questions/2130913/no-plot-window-in-matplotlib/2131021#2131021
+    #  plt.ion()
+    log=nx.Graph()
+    log_lock=Lock()
+    plt.show(block=False)
+    plt.pause(1)
+
+# Update log will be called from a thread(from Token_server) but we cannot draw
+# plt from thread so draw_log and update_log are seperate
+def update_log(ip,num_tkns,ip_neighbors):
+    with log_lock:
+        global pos
+        update_pos=False
+        # Adding existing nodes and edges doesn't do anything
+        if ip not in log.node:
+            update_pos=True
+            log.add_node(ip)
+        log.remove_edges_from(log.edges(ip))
+        for neighbor in ip_neighbors:
+            if neighbor not in log.node:
+                update_pos=True
+                log.add_node(neighbor)
+            if 'num_tkns' not in log.node[neighbor]:
+                log.node[neighbor]['num_tkns']=0
+            log.add_edge(ip,neighbor)
+        log.node[ip]['num_tkns']=num_tkns
+        if update_pos:
+            pos=nx.spring_layout(log)
+
+# https://networkx.github.io/documentation/latest/examples/drawing/labels_and_colors.html
+def draw_log():
+    with log_lock:
+        plt.clf()
+        labels=dict()
+        for tmp in log.nodes():
+            labels[tmp]=tmp+"("+str(log.node[tmp]['num_tkns'])+")"
+
+        nx.draw_networkx_nodes(log,pos,alpha=0,with_labels=False,ax=None)
+        nx.draw_networkx_edges(log,pos)
+        nx.draw_networkx_labels(log,pos,labels=labels)
+        #  nx.draw(log,pos,with_labels=True,node_size=50,labels=labels)
+        #  nx.draw_networkx_nodes(G,pos,node_color=colors,node_size=50)
+        #  nx.draw_networkx_edges(G,pos,alpha=0.3)
+        plt.axis('off')
+        plt.draw()
+        plt.pause(0.5)
 
 def is_hypercube_neighbor(ip):
     own_ip_bin=bin(int(ipaddress.IPv4Address(own_ip)-ip_sub))
@@ -46,6 +111,7 @@ def insert_log_server(ip):
 def send_log():
     data=dict()
     data["num_tokens"]=len(tokens_list)
+    data["neighbors"]=neighbors
     tkn=User_token(data,User_token.LOG)
     with log_servers_lock:
         for ip in log_servers:
