@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -i
 
 num_procs=2
 num_tkns=20
@@ -33,6 +33,10 @@ done
 echo "Num hosts: $num_procs"
 echo "Num tkns: $num_tkns"
 
+# load_balancer_build is an alias I use for doing docker build dir_name, with
+# proxy settings
+load_balancer_build
+
 # So that ip address allocation starts from begining
 # So that I can send tokens to 172.17.0.2
 sudo systemctl restart docker
@@ -48,7 +52,13 @@ do
     else
         # We need 172.17.0.2 as a host not log_server
         sleep $delay
-        xterm -e docker run -P shubhamshuklaerssss/load_balancer python -u load_balancer/host.py --log_server &
+        # Running GUI inside docker
+        # https://blog.jessfraz.com/post/docker-containers-on-the-desktop/
+        # http://stackoverflow.com/questions/25281992/alternatives-to-ssh-x11-forwarding-for-docker-containers
+        # To disable X server access control use xhost + , clients can connect
+        # from any host To go to original use "xhost -"
+        xhost +
+        xterm -e docker run -it -v /tmp/.X11-unix:/tmp/.X11-unix:ro -e DISPLAY=unix$DISPLAY -P shubhamshuklaerssss/load_balancer python -u load_balancer/host.py --log_server &
     fi
 
     # http://www.thegeekstuff.com/2010/06/bash-array-tutorial/
@@ -69,3 +79,4 @@ echo "Pids ${pids[@]}"
 # 172.17.0.1 is for host
 docker run -P shubhamshuklaerssss/load_balancer python -u load_balancer/client.py --ip 172.17.0.2 -n $(echo $num_tkns) --file load_balancer/workers/square.py
 # No need to kill the ${pids} as they are automatically killed when we do ctrl+c on the script
+xhost -
