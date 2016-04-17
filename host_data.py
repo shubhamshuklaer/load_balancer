@@ -132,7 +132,7 @@ def update_log(ip,num_tkns,ip_neighbors):
 def draw_log(graph_colormap='winter', bgcolor = (1, 1, 1),
                  node_size=0.005,
                  edge_color=(0.8, 0.8, 0.8), edge_size=0.001,
-                 text_size=0.008, text_color=(0, 0, 0)):
+                 text_size=0.008, text_color=(0, 0, 0),pos_scale=0.3):
     with log_lock:
         global update_pos
         global pos
@@ -147,7 +147,7 @@ def draw_log(graph_colormap='winter', bgcolor = (1, 1, 1),
             # Return a copy of the graph with the nodes relabeled using consecutive integers.
             #  G=nx.convert_node_labels_to_integers(log)
             # http://networkx.readthedocs.org/en/stable//reference/generated/networkx.drawing.layout.spring_layout.html
-            pos=nx.spring_layout(log, dim=3,scale=0.3)
+            pos=nx.spring_layout(log, dim=3,scale=pos_scale)
             v_list=[]
             pos_list=[]
             vertex_map=dict()
@@ -169,8 +169,11 @@ def draw_log(graph_colormap='winter', bgcolor = (1, 1, 1),
         mlab.clf()
         pts = mlab.points3d(xyz[:,0], xyz[:,1], xyz[:,2], scalars, scale_factor=node_size, scale_mode='none', colormap=graph_colormap, resolution=20)
         label_list=[]
+        loads=[]
         for v in v_list:
             label_list.append(v+"("+str(log.node[v]['num_tkns'])+")")
+            loads.append(log.node[v]['num_tkns'])
+
         for i, (x, y, z) in enumerate(xyz):
             # http://docs.enthought.com/mayavi/mayavi/auto/mlab_other_functions.html#text
             #  label = mlab.text(x, y, label_list[i], z=z, width=text_size, name=str(i), color=text_color)
@@ -181,6 +184,22 @@ def draw_log(graph_colormap='winter', bgcolor = (1, 1, 1),
         tmp_edges=[]
         for a,b in log.edges():
             tmp_edges.append((vertex_map[a],vertex_map[b]))
+
+        avg_discrepency=0
+        max_discrepency=0
+        count=0
+        for i in range(len(loads)):
+            for j in range(i+1,len(loads)):
+                discrepency=abs(loads[i]-loads[j])
+                avg_discrepency=avg_discrepency+discrepency
+                max_discrepency=max(max_discrepency,discrepency)
+                count=count+1
+
+        if count!=0:
+            avg_discrepency=avg_discrepency/count
+
+        mlab.text(pos_scale,pos_scale-0.03,"Avg discrepency: "+str(avg_discrepency),width=text_size*30,color=text_color)
+        mlab.text(pos_scale,pos_scale-0.08,"Max discrepency: "+str(max_discrepency),width=text_size*30,color=text_color)
 
         pts.mlab_source.dataset.lines = np.array(tmp_edges)
         tube = mlab.pipeline.tube(pts, tube_radius=edge_size)
