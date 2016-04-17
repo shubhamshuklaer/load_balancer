@@ -145,7 +145,7 @@ def draw_log(graph_colormap='winter', bgcolor = (1, 1, 1),
         for a,b in log.edges():
             tmp_edges.append((vertex_map[a],vertex_map[b]))
 
-        avg_discrepency=0
+        avg_discrepency=0.0
         max_discrepency=0
         count=0
         for i in range(len(loads)):
@@ -158,7 +158,7 @@ def draw_log(graph_colormap='winter', bgcolor = (1, 1, 1),
         if count!=0:
             avg_discrepency=avg_discrepency/count
 
-        mlab.text(pos_scale,pos_scale-0.03,"Avg discrepency: "+str(avg_discrepency),width=text_size*30,color=text_color)
+        mlab.text(pos_scale,pos_scale-0.03,"Avg discrepency: "+"{0:.2f}".format(avg_discrepency),width=text_size*30,color=text_color)
         mlab.text(pos_scale,pos_scale-0.08,"Max discrepency: "+str(max_discrepency),width=text_size*30,color=text_color)
 
         pts.mlab_source.dataset.lines = np.array(tmp_edges)
