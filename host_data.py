@@ -73,19 +73,6 @@ def init_log():
     do_after(LOG_SERVICE_BROADCAST_DELAY,log_service_broadcast)
     mlab.show()
 
-#    # https://groups.google.com/forum/#!topic/networkx-discuss/rUkjuIYFUec
-#    w,h=plt.figaspect(1)
-#    fig=plt.figure(figsize=(w,h))
-#    # http://stackoverflow.com/questions/3584805/in-matplotlib-what-does-the-argument-mean-in-fig-add-subplot111
-#    fig.add_subplot(111)
-#    #  fig.gca(projection='3d')
-#    # without plt.ion the update_log function does not return
-#    # http://stackoverflow.com/questions/2130913/no-plot-window-in-matplotlib/2131021#2131021
-#    plt.ion()
-#    plt.axis('off')
-#    plt.show()
-#    plt.pause(1)
-
 # Update log will be called from a thread(from Token_server) but we cannot draw
 # plt from thread so draw_log and update_log are seperate
 def update_log(ip,num_tkns,ip_neighbors):
@@ -109,23 +96,6 @@ def update_log(ip,num_tkns,ip_neighbors):
             log.add_edge(ip,neighbor)
         log.node[ip]['num_tkns']=num_tkns
 
-# https://networkx.github.io/documentation/latest/examples/drawing/labels_and_colors.html
-# def draw_log():
-#     with log_lock:
-#         plt.clf()
-#         labels=dict()
-#         for tmp in log.nodes():
-#             labels[tmp]=tmp+"("+str(log.node[tmp]['num_tkns'])+")"
-#
-#         nx.draw_networkx_nodes(log,pos,alpha=0,with_labels=False,ax=None)
-#         nx.draw_networkx_edges(log,pos)
-#         nx.draw_networkx_labels(log,pos,labels=labels)
-#         #  nx.draw(log,pos,with_labels=True,node_size=50,labels=labels)
-#         #  nx.draw_networkx_nodes(G,pos,node_color=colors,node_size=50)
-#         #  nx.draw_networkx_edges(G,pos,alpha=0.3)
-#         plt.axis('off')
-#         #  plt.draw()
-#         plt.pause(0.5)
 
 # https://www.udacity.com/wiki/creating-network-graphs-with-python
 # Draw 3d graphs with mayavi
@@ -143,9 +113,6 @@ def draw_log(graph_colormap='winter', bgcolor = (1, 1, 1),
         global vertex_map
         if update_pos:
             update_pos=False
-            # http://networkx.readthedocs.org/en/stable/reference/generated/networkx.relabel.convert_node_labels_to_integers.html
-            # Return a copy of the graph with the nodes relabeled using consecutive integers.
-            #  G=nx.convert_node_labels_to_integers(log)
             # http://networkx.readthedocs.org/en/stable//reference/generated/networkx.drawing.layout.spring_layout.html
             pos=nx.spring_layout(log, dim=3,scale=pos_scale)
             v_list=[]
@@ -163,9 +130,6 @@ def draw_log(graph_colormap='winter', bgcolor = (1, 1, 1),
             # The data has not yet been added
             return
 
-        #  figure=mlab.figure(1, bgcolor=bgcolor)
-        # http://stackoverflow.com/questions/12935231/annotating-many-points-with-text-in-mayavi-using-mlab
-        #  figure.scene.disable_render = True
         mlab.clf()
         pts = mlab.points3d(xyz[:,0], xyz[:,1], xyz[:,2], scalars, scale_factor=node_size, scale_mode='none', colormap=graph_colormap, resolution=20)
         label_list=[]
@@ -175,11 +139,7 @@ def draw_log(graph_colormap='winter', bgcolor = (1, 1, 1),
             loads.append(log.node[v]['num_tkns'])
 
         for i, (x, y, z) in enumerate(xyz):
-            # http://docs.enthought.com/mayavi/mayavi/auto/mlab_other_functions.html#text
-            #  label = mlab.text(x, y, label_list[i], z=z, width=text_size, name=str(i), color=text_color)
             label = mlab.text3d(x, y, z, label_list[i],scale=text_size, color=text_color)
-            #  label.property.shadow = True
-        #  figure.scene.disable_render = False
 
         tmp_edges=[]
         for a,b in log.edges():
