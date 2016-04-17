@@ -78,7 +78,7 @@ do
     # You will need delay between last loop and client one too.
 done
 
-sleep $delay
+sleep $(( 2 * $delay ))
 echo "Pids ${pids[@]}"
 
 # 172.17.0.1 is for host
