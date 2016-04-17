@@ -28,10 +28,17 @@ if sys.version_info < (3, 0):
 ip_sub=2
 
 # For log server
+plt=None
+np=None
+mlab=None
 log=None
 log_lock=None
-plt=None
 pos=None
+update_pos=False
+xyz=None
+scalars=None
+label_list=None
+vertex_map=None
 
 workers_hash=dict()
 workers_dir=os.path.join(os.path.dirname(os.path.realpath(__file__)),"workers")
@@ -39,27 +46,40 @@ workers_dir=os.path.join(os.path.dirname(os.path.realpath(__file__)),"workers")
 def init_log():
     global log
     global log_lock
-    # http://stackoverflow.com/questions/11990556/python-how-to-make-global-imports-from-a-function
-    global plt
-    import matplotlib.pyplot as plt
-    # For log server
-    # https://groups.google.com/forum/#!topic/networkx-discuss/rUkjuIYFUec
-    w,h=plt.figaspect(1)
-    plt.figure(figsize=(w,h))
-    # without plt.ion the update_log function does not return
-    # http://stackoverflow.com/questions/2130913/no-plot-window-in-matplotlib/2131021#2131021
-    #  plt.ion()
     log=nx.Graph()
     log_lock=Lock()
-    plt.show(block=False)
-    plt.pause(1)
+    # http://stackoverflow.com/questions/11990556/python-how-to-make-global-imports-from-a-function
+    global plt
+    global np
+    global mlab
+
+    #  import matplotlib.pyplot as plt
+    import numpy as np
+    from mayavi import mlab
+
+    mlab.figure(1)
+    mlab.clf()
+    mlab.show(stop=True)
+
+#    # https://groups.google.com/forum/#!topic/networkx-discuss/rUkjuIYFUec
+#    w,h=plt.figaspect(1)
+#    fig=plt.figure(figsize=(w,h))
+#    # http://stackoverflow.com/questions/3584805/in-matplotlib-what-does-the-argument-mean-in-fig-add-subplot111
+#    fig.add_subplot(111)
+#    #  fig.gca(projection='3d')
+#    # without plt.ion the update_log function does not return
+#    # http://stackoverflow.com/questions/2130913/no-plot-window-in-matplotlib/2131021#2131021
+#    plt.ion()
+#    plt.axis('off')
+#    plt.show()
+#    plt.pause(1)
 
 # Update log will be called from a thread(from Token_server) but we cannot draw
 # plt from thread so draw_log and update_log are seperate
 def update_log(ip,num_tkns,ip_neighbors):
     with log_lock:
         global pos
-        update_pos=False
+        global update_pos
         # Adding existing nodes and edges doesn't do anything
         if ip not in log.node:
             update_pos=True
@@ -73,26 +93,83 @@ def update_log(ip,num_tkns,ip_neighbors):
                 log.node[neighbor]['num_tkns']=0
             log.add_edge(ip,neighbor)
         log.node[ip]['num_tkns']=num_tkns
-        if update_pos:
-            pos=nx.spring_layout(log)
 
 # https://networkx.github.io/documentation/latest/examples/drawing/labels_and_colors.html
-def draw_log():
-    with log_lock:
-        plt.clf()
-        labels=dict()
-        for tmp in log.nodes():
-            labels[tmp]=tmp+"("+str(log.node[tmp]['num_tkns'])+")"
+# def draw_log():
+#     with log_lock:
+#         plt.clf()
+#         labels=dict()
+#         for tmp in log.nodes():
+#             labels[tmp]=tmp+"("+str(log.node[tmp]['num_tkns'])+")"
+#
+#         nx.draw_networkx_nodes(log,pos,alpha=0,with_labels=False,ax=None)
+#         nx.draw_networkx_edges(log,pos)
+#         nx.draw_networkx_labels(log,pos,labels=labels)
+#         #  nx.draw(log,pos,with_labels=True,node_size=50,labels=labels)
+#         #  nx.draw_networkx_nodes(G,pos,node_color=colors,node_size=50)
+#         #  nx.draw_networkx_edges(G,pos,alpha=0.3)
+#         plt.axis('off')
+#         #  plt.draw()
+#         plt.pause(0.5)
 
-        nx.draw_networkx_nodes(log,pos,alpha=0,with_labels=False,ax=None)
-        nx.draw_networkx_edges(log,pos)
-        nx.draw_networkx_labels(log,pos,labels=labels)
-        #  nx.draw(log,pos,with_labels=True,node_size=50,labels=labels)
-        #  nx.draw_networkx_nodes(G,pos,node_color=colors,node_size=50)
-        #  nx.draw_networkx_edges(G,pos,alpha=0.3)
-        plt.axis('off')
-        plt.draw()
-        plt.pause(0.5)
+# https://www.udacity.com/wiki/creating-network-graphs-with-python
+# Draw 3d graphs with mayavi
+def draw_log(graph_colormap='winter', bgcolor = (1, 1, 1),
+                 node_size=0.005,
+                 edge_color=(0.8, 0.8, 0.8), edge_size=0.001,
+                 text_size=0.008, text_color=(0, 0, 0)):
+    with log_lock:
+        global update_pos
+        global pos
+        global xyz
+        global scalars
+        global label_list
+        global mlab
+        global vertex_map
+        if update_pos:
+            update_pos=False
+            # http://networkx.readthedocs.org/en/stable/reference/generated/networkx.relabel.convert_node_labels_to_integers.html
+            # Return a copy of the graph with the nodes relabeled using consecutive integers.
+            #  G=nx.convert_node_labels_to_integers(log)
+            # http://networkx.readthedocs.org/en/stable//reference/generated/networkx.drawing.layout.spring_layout.html
+            pos=nx.spring_layout(log, dim=3,scale=0.3)
+            v_list=[]
+            label_list=[]
+            vertex_map=dict()
+            for v,v_data in log.nodes(data=True):
+                vertex_map[v]=len(v_list)
+                v_list.append(pos[v])
+                label_list.append(v+"("+str(v_data['num_tkns'])+")")
+            xyz=np.array(v_list)
+            # the + 5 will add 5 to each element of array
+            scalars=np.array(range(1,len(log.nodes())+1))+5
+
+        if xyz == None:
+            # The data has not yet been added
+            return
+
+        figure=mlab.figure(1, bgcolor=bgcolor)
+        # http://stackoverflow.com/questions/12935231/annotating-many-points-with-text-in-mayavi-using-mlab
+        #  figure.scene.disable_render = True
+        mlab.clf()
+        pts = mlab.points3d(xyz[:,0], xyz[:,1], xyz[:,2], scalars, scale_factor=node_size, scale_mode='none', colormap=graph_colormap, resolution=20)
+        for i, (x, y, z) in enumerate(xyz):
+            # http://docs.enthought.com/mayavi/mayavi/auto/mlab_other_functions.html#text
+            #  label = mlab.text(x, y, label_list[i], z=z, width=text_size, name=str(i), color=text_color)
+            label = mlab.text3d(x, y, z, label_list[i],scale=text_size, color=text_color)
+            #  label.property.shadow = True
+        #  figure.scene.disable_render = False
+
+        tmp_edges=[]
+        for a,b in log.edges():
+            tmp_edges.append((vertex_map[a],vertex_map[b]))
+
+        pts.mlab_source.dataset.lines = np.array(tmp_edges)
+        tube = mlab.pipeline.tube(pts, tube_radius=edge_size)
+        mlab.pipeline.surface(tube, color=edge_color)
+        mlab.show(stop=True)
+
+
 
 def is_hypercube_neighbor(ip):
     # ipaddress.IPv4Address needs unicode(eg utf8) string
