@@ -31,17 +31,24 @@ ip_sub=2
 plt=None
 np=None
 mlab=None
+do_after=None
 log=None
 log_lock=None
 pos=None
 update_pos=False
 xyz=None
 scalars=None
-label_list=None
+v_list=None
 vertex_map=None
-
+LOG_SERVICE_BROADCAST_DELAY=10000
+DRAW_LOG_DELAY=1000
 workers_hash=dict()
 workers_dir=os.path.join(os.path.dirname(os.path.realpath(__file__)),"workers")
+
+def log_service_broadcast():
+    run_token_client("<broadcast>",[User_token("",User_token.LOG_SERVICE_BROADCAST)])
+    do_after(LOG_SERVICE_BROADCAST_DELAY,log_service_broadcast)
+
 
 def init_log():
     global log
@@ -52,14 +59,19 @@ def init_log():
     global plt
     global np
     global mlab
+    global do_after
 
     #  import matplotlib.pyplot as plt
     import numpy as np
     from mayavi import mlab
+    from pyface.timer.do_later import do_after
 
     mlab.figure(1)
     mlab.clf()
-    mlab.show(stop=True)
+    do_after(DRAW_LOG_DELAY,draw_log)
+    log_service_broadcast()
+    do_after(LOG_SERVICE_BROADCAST_DELAY,log_service_broadcast)
+    mlab.show()
 
 #    # https://groups.google.com/forum/#!topic/networkx-discuss/rUkjuIYFUec
 #    w,h=plt.figaspect(1)
@@ -77,6 +89,9 @@ def init_log():
 # Update log will be called from a thread(from Token_server) but we cannot draw
 # plt from thread so draw_log and update_log are seperate
 def update_log(ip,num_tkns,ip_neighbors):
+    if log_lock is None:
+        # The token serv is started before log is initialized
+        return
     with log_lock:
         global pos
         global update_pos
@@ -123,7 +138,7 @@ def draw_log(graph_colormap='winter', bgcolor = (1, 1, 1),
         global pos
         global xyz
         global scalars
-        global label_list
+        global v_list
         global mlab
         global vertex_map
         if update_pos:
@@ -134,13 +149,13 @@ def draw_log(graph_colormap='winter', bgcolor = (1, 1, 1),
             # http://networkx.readthedocs.org/en/stable//reference/generated/networkx.drawing.layout.spring_layout.html
             pos=nx.spring_layout(log, dim=3,scale=0.3)
             v_list=[]
-            label_list=[]
+            pos_list=[]
             vertex_map=dict()
             for v,v_data in log.nodes(data=True):
                 vertex_map[v]=len(v_list)
-                v_list.append(pos[v])
-                label_list.append(v+"("+str(v_data['num_tkns'])+")")
-            xyz=np.array(v_list)
+                v_list.append(v)
+                pos_list.append(pos[v])
+            xyz=np.array(pos_list)
             # the + 5 will add 5 to each element of array
             scalars=np.array(range(1,len(log.nodes())+1))+5
 
@@ -148,11 +163,14 @@ def draw_log(graph_colormap='winter', bgcolor = (1, 1, 1),
             # The data has not yet been added
             return
 
-        figure=mlab.figure(1, bgcolor=bgcolor)
+        #  figure=mlab.figure(1, bgcolor=bgcolor)
         # http://stackoverflow.com/questions/12935231/annotating-many-points-with-text-in-mayavi-using-mlab
         #  figure.scene.disable_render = True
         mlab.clf()
         pts = mlab.points3d(xyz[:,0], xyz[:,1], xyz[:,2], scalars, scale_factor=node_size, scale_mode='none', colormap=graph_colormap, resolution=20)
+        label_list=[]
+        for v in v_list:
+            label_list.append(v+"("+str(log.node[v]['num_tkns'])+")")
         for i, (x, y, z) in enumerate(xyz):
             # http://docs.enthought.com/mayavi/mayavi/auto/mlab_other_functions.html#text
             #  label = mlab.text(x, y, label_list[i], z=z, width=text_size, name=str(i), color=text_color)
@@ -167,8 +185,8 @@ def draw_log(graph_colormap='winter', bgcolor = (1, 1, 1),
         pts.mlab_source.dataset.lines = np.array(tmp_edges)
         tube = mlab.pipeline.tube(pts, tube_radius=edge_size)
         mlab.pipeline.surface(tube, color=edge_color)
-        mlab.show(stop=True)
-
+        do_after(DRAW_LOG_DELAY,draw_log)
+        mlab.show()
 
 
 def is_hypercube_neighbor(ip):
