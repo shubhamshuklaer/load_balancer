@@ -2,7 +2,7 @@
 
 num_procs=2
 num_tkns=20
-delay=10
+delay=5
 is_hypercube=""
 
 # http://stackoverflow.com/questions/402377/using-getopts-in-bash-shell-script-to-get-long-and-short-command-line-options
