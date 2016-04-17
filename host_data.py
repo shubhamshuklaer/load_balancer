@@ -21,6 +21,9 @@ neighbors_lock=Lock()
 prev_index=0
 is_hypercube=False
 own_ip=get_ip_address()
+if sys.version_info < (3, 0):
+    own_ip=own_ip.decode('utf8')
+
 # Ip assigned to with docker starts from 2, but grey code should start from 0
 ip_sub=2
 
@@ -92,6 +95,14 @@ def draw_log():
         plt.pause(0.5)
 
 def is_hypercube_neighbor(ip):
+    # ipaddress.IPv4Address needs unicode(eg utf8) string
+    # In python2 string is ascii and to convert it to unicode we have to do
+    # some_str.decode('utf8') for unicode to ascii we have to do
+    # some_str.encode('ascci')
+    # Literal strings are unicode by default in Python3
+    if sys.version_info < (3, 0):
+        ip=ip.decode('utf8')
+
     own_ip_bin=bin(int(ipaddress.IPv4Address(own_ip)-ip_sub))
     ip_bin=bin(int(ipaddress.IPv4Address(ip)-ip_sub))
     num_diff=0
