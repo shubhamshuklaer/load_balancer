@@ -52,13 +52,18 @@ do
     else
         # We need 172.17.0.2 as a host not log_server
         sleep $delay
-        # Running GUI inside docker
-        # https://blog.jessfraz.com/post/docker-containers-on-the-desktop/
-        # http://stackoverflow.com/questions/25281992/alternatives-to-ssh-x11-forwarding-for-docker-containers
         # To disable X server access control use xhost + , clients can connect
         # from any host To go to original use "xhost -"
         xhost +
-        xterm -e docker run -it -v /tmp/.X11-unix:/tmp/.X11-unix:ro -e DISPLAY=unix$DISPLAY -P shubhamshuklaerssss/load_balancer python -u load_balancer/host.py --log_server &
+        # Running GUI inside docker
+        # https://blog.jessfraz.com/post/docker-containers-on-the-desktop/
+        # http://stackoverflow.com/questions/25281992/alternatives-to-ssh-x11-forwarding-for-docker-containers
+        # Mayavi used in showing 3d graph use accelerated graphics so /dev/dri is required
+        # Without /dev/dri you get the following error
+        # libGL error: failed to open drm device: No such file or directory
+        # libGL error: failed to load driver: i965
+
+        xterm -e docker run -it -v /tmp/.X11-unix:/tmp/.X11-unix:ro -e DISPLAY=unix$DISPLAY --device /dev/dri -P shubhamshuklaerssss/load_balancer python -u load_balancer/host.py --log_server &
     fi
 
     # http://www.thegeekstuff.com/2010/06/bash-array-tutorial/
