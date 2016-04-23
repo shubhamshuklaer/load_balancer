@@ -158,8 +158,9 @@ def draw_log(graph_colormap='winter', bgcolor = (1, 1, 1),
         if count!=0:
             avg_discrepency=avg_discrepency/count
 
-        mlab.text(pos_scale,pos_scale-0.03,"Avg discrepency: "+"{0:.2f}".format(avg_discrepency),width=text_size*30,color=text_color)
-        mlab.text(pos_scale,pos_scale-0.08,"Max discrepency: "+str(max_discrepency),width=text_size*30,color=text_color)
+        # The space in the end is put so that the last letter does not look cut at the end
+        mlab.text(10*text_size,1-0.03,"Avg discrepency: "+"{0:.2f}".format(avg_discrepency)+'  ',width=text_size*30,color=text_color)
+        mlab.text(10*text_size,1-0.08,"Max discrepency: "+str(max_discrepency)+'  ',width=text_size*30,color=text_color)
 
         pts.mlab_source.dataset.lines = np.array(tmp_edges)
         tube = mlab.pipeline.tube(pts, tube_radius=edge_size)
