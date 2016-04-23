@@ -14,6 +14,7 @@ import networkx as nx
 import subprocess
 import shlex
 
+self_loop_fraction=1
 neighbors=[]
 tokens_list=[]
 log_servers=[]

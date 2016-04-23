@@ -5,10 +5,11 @@ num_tkns=20
 delay=5
 is_hypercube=""
 use_ip=false
+self_loop_fraction=""
 
 # http://stackoverflow.com/questions/402377/using-getopts-in-bash-shell-script-to-get-long-and-short-command-line-options
 # http://wiki.bash-hackers.org/howto/getopts_tutorial
-while getopts ":p:t:ci" opt; do
+while getopts ":p:t:cis:" opt; do
   case $opt in
     p)
       num_procs=$OPTARG
@@ -18,6 +19,9 @@ while getopts ":p:t:ci" opt; do
       ;;
     i)
       use_ip=true
+      ;;
+    s)
+      self_loop_fraction="--self_loop_fraction "$OPTARG
       ;;
     c)
       is_hypercube="--hypercube"
@@ -52,7 +56,7 @@ do
     # http://unix.stackexchange.com/questions/3886/difference-between-nohup-disown-and
     if [ $i -ne $(($num_procs + 1)) ]
     then
-        xterm -e docker run -P shubhamshuklaerssss/load_balancer python -u load_balancer/host.py `echo $is_hypercube` &
+        xterm -e docker run -P shubhamshuklaerssss/load_balancer python -u load_balancer/host.py `echo $self_loop_fraction` `echo $is_hypercube` &
     else
         # We need 172.17.0.2 as a host not log_server
         sleep $delay

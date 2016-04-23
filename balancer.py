@@ -7,6 +7,8 @@ def balance():
     d=len(host_data.neighbors)
     if d == 0:
         return
+    cycle_length=d+int(d*host_data.self_loop_fraction)
+    #  print("cycle lenght :"+str(cycle_length))
     tmp_tkns=[]
     for i in range(d):
         tmp_tkns.append([])
@@ -17,7 +19,7 @@ def balance():
 
         for i in range(tk_len):
             tmp=host_data.tokens_list.pop()
-            index=(host_data.prev_index + 1 + i) % (2*d)
+            index=(host_data.prev_index + 1 + i) % cycle_length
             #  print("index :"+str(index))
             if index < d:
                 tmp_tkns[index].append(tmp)

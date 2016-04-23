@@ -20,7 +20,7 @@ def usage():
     print("TODO")
 
 try:
-    opts,args=getopt.getopt(sys.argv[1:],"h",["neighbors=","log_server","hypercube"])
+    opts,args=getopt.getopt(sys.argv[1:],"h",["neighbors=","log_server","hypercube","self_loop_fraction="])
 except getopt.GetoptError:
     usage()
     exit(2)
@@ -32,6 +32,11 @@ for opt,arg in opts:
     elif opt=="--neighbors":
         print(arg)
         host_data.neighbors=json.loads(arg)
+    elif opt=="--self_loop_fraction":
+        if not (float(arg)>=0 and float(arg)<=1):
+            print("self loop fraction should be between 0 and 1")
+            exit(2)
+        host_data.self_loop_fraction=float(arg)
     elif opt=="--log_server":
         host_server=False
     elif opt=="--hypercube":
@@ -50,6 +55,7 @@ if not reactor.running:
 print(get_ip_address())
 
 if host_server:
+    print("Self loop fraction: "+str(host_data.self_loop_fraction))
     host_data.gen_all_hash()
     threading.Thread(target=run_token_serv).start()
 else:
