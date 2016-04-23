@@ -20,7 +20,7 @@ class Token_serv(DatagramProtocol):
                     if host_data.insert_worker(tmp_tkn.data["file_name"],tmp_tkn.data["content"]):
                         host_data.send_worker_to_all(tmp_tkn)
                 elif tmp_tkn.data_type==User_token.SOLVED:
-                    print(tmp_tkn)
+                    host_data.accept_data_func(tmp_tkn.data)
                 elif tmp_tkn.data_type==User_token.SERVICE_BROADCAST:
                     if host_data.is_hypercube:
                         if host_data.is_hypercube_neighbor(tmp_tkn.ip):

@@ -95,6 +95,6 @@ then
     # 172.17.0.1 is for host
     ip_flag="--ip 172.17.0.2"
 fi
-docker run -P shubhamshuklaerssss/load_balancer python -u load_balancer/client.py $(echo $ip_flag) -n $(echo $num_tkns) --file load_balancer/workers/square.py
+docker run -P shubhamshuklaerssss/load_balancer python -u load_balancer/client.py $(echo $ip_flag) -s -c load_balancer/clients/test.py -w load_balancer/workers/square.py -- -l $(echo $num_tkns)
 # No need to kill the ${pids} as they are automatically killed when we do ctrl+c on the script
 xhost -

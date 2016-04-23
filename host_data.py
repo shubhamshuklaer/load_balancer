@@ -14,6 +14,7 @@ import networkx as nx
 import subprocess
 import shlex
 
+accept_data_func=None
 self_loop_fraction=1
 neighbors=[]
 tokens_list=[]
