@@ -9,12 +9,14 @@ from twisted.internet import reactor
 import host_data
 import config
 import pickle
+import threading
+import time
 
 num_tokens=10
 ip=None
 file_path=None
 send_tokens=False
-
+wait_for_neighbors=20
 def usage():
     print("TODO")
 
@@ -59,13 +61,30 @@ if not (os.path.exists(file_path) and os.path.splitext(file_path)[1]==".py"):
     print("File does not exist or is not a python script")
     exit(2)
 
-if ip != None:
+def run_with_fastest_ping(func):
+    fast_ip=None
+    while fast_ip == None:
+        print("Waiting for fastest ping")
+        time.sleep(wait_for_neighbors)
+        fast_ip=host_data.get_fastest_neighbor()
+        if fast_ip!=None:
+            print("Ip choosen: "+fast_ip)
+            run_token_client(fast_ip,func())
+
+
+if ip == None:
+    if send_tokens == True:
+        _args=[get_test_token_list]
+    else:
+        _args=[get_file]
+    threading.Thread(target=run_with_fastest_ping,args=_args).start()
+    run_token_serv(config.solved_token_serv_port)
+else:
     if send_tokens == True:
         run_token_client(ip,get_test_token_list())
         run_token_serv(config.solved_token_serv_port)
     else:
         run_token_client(ip,get_file())
 
-    if not reactor.running:
-        reactor.run()
-
+if not reactor.running:
+    reactor.run()

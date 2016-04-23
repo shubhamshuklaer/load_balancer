@@ -4,16 +4,20 @@ num_procs=2
 num_tkns=20
 delay=5
 is_hypercube=""
+use_ip=false
 
 # http://stackoverflow.com/questions/402377/using-getopts-in-bash-shell-script-to-get-long-and-short-command-line-options
 # http://wiki.bash-hackers.org/howto/getopts_tutorial
-while getopts ":p:t:c" opt; do
+while getopts ":p:t:ci" opt; do
   case $opt in
     p)
       num_procs=$OPTARG
       ;;
     t)
       num_tkns=$OPTARG
+      ;;
+    i)
+      use_ip=true
       ;;
     c)
       is_hypercube="--hypercube"
@@ -80,8 +84,13 @@ done
 
 sleep $(( 2 * $delay ))
 echo "Pids ${pids[@]}"
-
-# 172.17.0.1 is for host
-docker run -P shubhamshuklaerssss/load_balancer python -u load_balancer/client.py --ip 172.17.0.2 -n $(echo $num_tkns) --file load_balancer/workers/square.py
+ip_flag=""
+# http://stackoverflow.com/questions/3810709/how-to-evaluate-a-boolean-variable-in-an-if-block-in-bash
+if $use_ip
+then
+    # 172.17.0.1 is for host
+    ip_flag="--ip 172.17.0.2"
+fi
+docker run -P shubhamshuklaerssss/load_balancer python -u load_balancer/client.py $(echo $ip_flag) -n $(echo $num_tkns) --file load_balancer/workers/square.py
 # No need to kill the ${pids} as they are automatically killed when we do ctrl+c on the script
 xhost -

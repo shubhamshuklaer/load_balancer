@@ -9,7 +9,10 @@ import config
 from token_client import run_token_client
 from user_token import User_token,get_ip_address
 import ipaddress
+import copy
 import networkx as nx
+import subprocess
+import shlex
 
 neighbors=[]
 tokens_list=[]
@@ -44,6 +47,37 @@ LOG_SERVICE_BROADCAST_DELAY=10000
 DRAW_LOG_DELAY=1000
 workers_hash=dict()
 workers_dir=os.path.join(os.path.dirname(os.path.realpath(__file__)),"workers")
+
+
+def get_rtt(ip_addr):
+    cmd="ping -c2 -q "+ip_addr
+    pint_out=""
+    try:
+        ping_out=subprocess.check_output(shlex.split(cmd))
+    except subprocess.CalledProcessError:
+        # Not reachable
+        return 1000
+    else:
+        for line in ping_out.splitlines():
+            line=str(line)
+            if "rtt min/avg/max/mdev =" in line:
+                line_split=line.split("=",2)
+                avg_rtt=line_split[1].split("/")[1]
+                return float(avg_rtt)
+
+def get_fastest_neighbor():
+    tmp_neighbors=[]
+    with neighbors_lock:
+        tmp_neighbors=copy.deepcopy(neighbors)
+    if len(tmp_neighbors)==0:
+        return None
+    rtts=[]
+    for neighbor in tmp_neighbors:
+        rtts.append((neighbor,get_rtt(neighbor)))
+
+    rtts=sorted(rtts,key=lambda tmp: tmp[1])
+    print("Rtts: "+str(rtts))
+    return rtts[0][0]
 
 def log_service_broadcast():
     run_token_client("<broadcast>",[User_token("",User_token.LOG_SERVICE_BROADCAST)])
@@ -214,6 +248,7 @@ def insert_neighbor(ip):
 def broadcast_service():
     tkn=User_token("",User_token.SERVICE_BROADCAST)
     run_token_client("<broadcast>",[tkn])
+    run_token_client("<broadcast>",[tkn],config.solved_token_serv_port)
 
 
 def calc_file_hash(file_path):
