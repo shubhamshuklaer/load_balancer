@@ -22,6 +22,8 @@ class Token_serv(DatagramProtocol):
                 elif tmp_tkn.data_type==User_token.SOLVED:
                     host_data.accept_data_func(tmp_tkn.data)
                 elif tmp_tkn.data_type==User_token.SERVICE_BROADCAST:
+                    if host_data.manual_neighbors:
+                        return
                     if host_data.is_hypercube:
                         if host_data.is_hypercube_neighbor(tmp_tkn.ip):
                             host_data.insert_neighbor(tmp_tkn.ip)
