@@ -7,6 +7,28 @@ is_hypercube=""
 use_ip=false
 self_loop_fraction=""
 
+function create_log(){
+    mkdir logs;
+    log_count=0
+    for file in logs/*
+    do
+        if [[ "$file" =~ ^logs/[0-9]+\.txt$ ]]
+        then
+            log_count=$(( $log_count + 1 ))
+        fi
+    done
+    log_count=$(( $log_count + 1 ))
+    new_log="logs/"$log_count".txt"
+    echo "$new_log"
+    touch $new_log
+
+    echo "Num hosts: $num_procs" >> $new_log
+    echo "Num tkns: $num_tkns" >> $new_log
+    echo "Hypercube flag: $is_hypercube" >> $new_log
+    echo "Self loop fraction: $self_loop_fraction" >> $new_log
+}
+
+
 # http://stackoverflow.com/questions/402377/using-getopts-in-bash-shell-script-to-get-long-and-short-command-line-options
 # http://wiki.bash-hackers.org/howto/getopts_tutorial
 while getopts ":p:t:cis:" opt; do
@@ -40,6 +62,8 @@ done
 
 echo "Num hosts: $num_procs"
 echo "Num tkns: $num_tkns"
+echo "Hypercube flag: $is_hypercube"
+echo "Self loop fraction: $self_loop_fraction"
 
 # load_balancer_build is an alias I use for doing docker build dir_name, with
 # proxy settings
@@ -71,7 +95,10 @@ do
         # libGL error: failed to open drm device: No such file or directory
         # libGL error: failed to load driver: i965
 
-        xterm -e docker run -it -v /tmp/.X11-unix:/tmp/.X11-unix:ro -e DISPLAY=unix$DISPLAY --device /dev/dri -P shubhamshuklaerssss/load_balancer python -u load_balancer/host.py --log_server &
+        # xterm -e spawns the first program and earlier it was docker but
+        # piping(used for tee) is not a functionality of docker but of bash so
+        # we spawn bash
+        xterm -e /bin/bash -c "docker run -it -v /tmp/.X11-unix:/tmp/.X11-unix:ro -e DISPLAY=unix$DISPLAY --device /dev/dri -P shubhamshuklaerssss/load_balancer python -u load_balancer/host.py --log_server | tee -a $(create_log)" &
     fi
 
     # http://www.thegeekstuff.com/2010/06/bash-array-tutorial/
