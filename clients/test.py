@@ -6,6 +6,7 @@ def usage():
     print("Client usage TODO")
 
 def generate_data_list(args):
+    global num_tokens
     try:
         opts,args=getopt.getopt(args,"l:")
     except getopt.GetoptError:
