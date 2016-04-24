@@ -122,14 +122,15 @@ def update_log(ip,num_tkns,ip_neighbors):
         if ip not in log.node:
             update_pos=True
             log.add_node(ip)
-        log.remove_edges_from(log.edges(ip))
         for neighbor in ip_neighbors:
             if neighbor not in log.node:
                 update_pos=True
                 log.add_node(neighbor)
             if 'num_tkns' not in log.node[neighbor]:
                 log.node[neighbor]['num_tkns']=0
-            log.add_edge(ip,neighbor)
+            if neighbor not in nx.all_neighbors(log,ip):
+                update_pos=True
+                log.add_edge(ip,neighbor)
         log.node[ip]['num_tkns']=num_tkns
 
 
@@ -150,7 +151,7 @@ def draw_log(graph_colormap='winter', bgcolor = (1, 1, 1),
         if update_pos:
             update_pos=False
             # http://networkx.readthedocs.org/en/stable//reference/generated/networkx.drawing.layout.spring_layout.html
-            pos=nx.spring_layout(log, dim=3,scale=pos_scale)
+            pos=nx.spring_layout(log, dim=3,scale=pos_scale,iterations=100)
             v_list=[]
             pos_list=[]
             vertex_map=dict()
