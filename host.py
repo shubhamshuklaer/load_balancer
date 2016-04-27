@@ -34,8 +34,8 @@ for opt,arg in opts:
         host_data.neighbors=json.loads(arg)
         host_data.manual_neighbors=True
     elif opt=="--self_loop_fraction":
-        if not (float(arg)>=0 and float(arg)<=1):
-            print("self loop fraction should be between 0 and 1")
+        if float(arg)<0 :
+            print("self loop fraction should be greater than 0")
             exit(2)
         host_data.self_loop_fraction=float(arg)
     elif opt=="--log_server":
