@@ -19,6 +19,7 @@ RUN apt-get install -y python python-pip python-matplotlib python-twisted python
 # RUN apt-get install -y python-wxgtk2.8 python-wxtools wx2.8-i18n python-vtk python-numpy python-configobj python-setuptools python-dev
 RUN apt-get install -y python-vtk python-numpy python-configobj python-setuptools python-dev
 RUN pip install ipaddress mayavi
+RUN apt-get install -y inetutils-ping
 
 
 RUN mkdir load_balancer
