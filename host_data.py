@@ -14,6 +14,7 @@ import networkx as nx
 import subprocess
 import shlex
 
+is_client=False
 manual_neighbors=False
 accept_data_func=None
 self_loop_fraction=1
@@ -245,7 +246,7 @@ def send_log():
 
 
 def insert_neighbor(ip):
-    if ip != get_ip_address():
+    if ip != get_ip_address() or is_client:
         with neighbors_lock:
             if ip not in neighbors:
                 neighbors.append(ip)

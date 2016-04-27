@@ -92,6 +92,7 @@ def run_with_fastest_ping(func):
             run_token_client(fast_ip,func())
 
 
+host_data.is_client=True
 if ip == None:
     if send_tokens == True:
         _args=[generate_token_list]
