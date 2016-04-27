@@ -184,24 +184,24 @@ def draw_log(graph_colormap='winter', bgcolor = (1, 1, 1),
         for a,b in log.edges():
             tmp_edges.append((vertex_map[a],vertex_map[b]))
 
-        avg_discrepency=0.0
-        max_discrepency=0
+        avg_load_diff=0.0
+        max_load_diff=0
         count=0
         for i in range(len(loads)):
             for j in range(i+1,len(loads)):
-                discrepency=abs(loads[i]-loads[j])
-                avg_discrepency=avg_discrepency+discrepency
-                max_discrepency=max(max_discrepency,discrepency)
+                load_diff=abs(loads[i]-loads[j])
+                avg_load_diff=avg_load_diff+load_diff
+                max_load_diff=max(max_load_diff,load_diff)
                 count=count+1
 
         if count!=0:
-            avg_discrepency=avg_discrepency/count
+            avg_load_diff=avg_load_diff/count
 
         # The space in the end is put so that the last letter does not look cut at the end
-        mlab.text(10*text_size,1-0.03,"Avg discrepency: "+"{0:.2f}".format(avg_discrepency)+'  ',width=text_size*30,color=text_color)
-        mlab.text(10*text_size,1-0.08,"Max discrepency: "+str(max_discrepency)+'  ',width=text_size*30,color=text_color)
+        mlab.text(10*text_size,1-0.03,"Avg load_diff: "+"{0:.2f}".format(avg_load_diff)+'  ',width=text_size*30,color=text_color)
+        mlab.text(10*text_size,1-0.08,"Max load_diff: "+str(max_load_diff)+'  ',width=text_size*30,color=text_color)
 
-        print("{0:.2f}".format(avg_discrepency)+":"+str(max_discrepency))
+        print("{0:.2f}".format(avg_load_diff)+":"+str(max_load_diff))
 
         pts.mlab_source.dataset.lines = np.array(tmp_edges)
         tube = mlab.pipeline.tube(pts, tube_radius=edge_size)
