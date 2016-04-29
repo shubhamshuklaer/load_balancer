@@ -4,7 +4,7 @@ num_procs=2
 num_tkns=20
 delay=5
 is_hypercube=""
-use_ip=false
+ip_addr=""
 self_loop_fraction=""
 multiple=false
 
@@ -32,7 +32,7 @@ function create_log(){
 
 # http://stackoverflow.com/questions/402377/using-getopts-in-bash-shell-script-to-get-long-and-short-command-line-options
 # http://wiki.bash-hackers.org/howto/getopts_tutorial
-while getopts ":p:t:cis:m" opt; do
+while getopts ":p:t:ci:s:m" opt; do
   case $opt in
     p)
       num_procs=$OPTARG
@@ -41,7 +41,7 @@ while getopts ":p:t:cis:m" opt; do
       num_tkns=$OPTARG
       ;;
     i)
-      use_ip=true
+      ip_addr=$OPTARG
       ;;
     m)
       multiple=true
@@ -121,10 +121,10 @@ sleep $(( 2 * $delay ))
 echo "Pids ${pids[@]}"
 ip_flag=""
 # http://stackoverflow.com/questions/3810709/how-to-evaluate-a-boolean-variable-in-an-if-block-in-bash
-if $use_ip
+if [ ! -z "$ip_addr" ]
 then
     # 172.17.0.1 is for host
-    ip_flag="--ip 172.17.0.2"
+    ip_flag="--ip $ip_addr"
 fi
 
 if $multiple
