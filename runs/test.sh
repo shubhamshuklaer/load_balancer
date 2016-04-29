@@ -6,6 +6,7 @@ delay=5
 is_hypercube=""
 use_ip=false
 self_loop_fraction=""
+multiple=false
 
 function create_log(){
     mkdir logs;
@@ -31,7 +32,7 @@ function create_log(){
 
 # http://stackoverflow.com/questions/402377/using-getopts-in-bash-shell-script-to-get-long-and-short-command-line-options
 # http://wiki.bash-hackers.org/howto/getopts_tutorial
-while getopts ":p:t:cis:" opt; do
+while getopts ":p:t:cis:m" opt; do
   case $opt in
     p)
       num_procs=$OPTARG
@@ -41,6 +42,9 @@ while getopts ":p:t:cis:" opt; do
       ;;
     i)
       use_ip=true
+      ;;
+    m)
+      multiple=true
       ;;
     s)
       self_loop_fraction="--self_loop_fraction "$OPTARG
@@ -122,6 +126,14 @@ then
     # 172.17.0.1 is for host
     ip_flag="--ip 172.17.0.2"
 fi
-docker run -P shubhamshuklaerssss/load_balancer python -u load_balancer/client.py $(echo $ip_flag) -s -c load_balancer/clients/test.py -w load_balancer/workers/square.py -- -l $(echo $num_tkns)
+
+if $multiple
+then
+    xterm -e docker run -P shubhamshuklaerssss/load_balancer python -u load_balancer/client.py $(echo $ip_flag) -s -c load_balancer/clients/test.py -w load_balancer/workers/square.py -- -l $(echo $num_tkns) &
+    sleep $(( 5 * $delay ))
+    docker run -P shubhamshuklaerssss/load_balancer python -u load_balancer/client.py $(echo $ip_flag) -s -c load_balancer/clients/test.py -w load_balancer/workers/square.py -- -l $(echo $num_tkns)
+else
+    docker run -P shubhamshuklaerssss/load_balancer python -u load_balancer/client.py $(echo $ip_flag) -s -c load_balancer/clients/test.py -w load_balancer/workers/square.py -- -l $(echo $num_tkns)
+fi
 # No need to kill the ${pids} as they are automatically killed when we do ctrl+c on the script
 xhost -
